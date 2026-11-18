@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  part6_tests:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - statemanagment-zustand/unicafe
+          - statemanagment-zustand/anecdotes
+          - statemanagment-zustand/query-anecdotes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install app dependencies
+        working-directory: ${{ matrix.app }}
+        run: npm ci
+      - name: Run unit tests
+        if: matrix.app == 'statemanagment-zustand/anecdotes'
+        working-directory: ${{ matrix.app }}
+        run: npm test
+      - name: Run e2e tests
+        if: matrix.app != 'statemanagment-zustand/anecdotes'
+        working-directory: ${{ matrix.app }}-tests
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm test
+
+  

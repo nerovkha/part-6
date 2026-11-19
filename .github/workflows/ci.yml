@@ -1,42 +1,30 @@
-
 name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, master]
   pull_request:
-    branches:
-      - main
+    branches: [main, master]
 
 jobs:
-  part6_tests:
+  tests:
     runs-on: ubuntu-24.04
-
     strategy:
       fail-fast: false
       matrix:
-        app:
-          - anecdotes
-          - unicafe
-          - query-anecdotes
-
+        app: [unicafe, anecdotes, query-anecdotes]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - name: Install app dependencies
         working-directory: ${{ matrix.app }}
         run: npm ci
-
       - name: Run unit tests
         if: matrix.app == 'anecdotes'
-        working-directory: anecdotes
+        working-directory: ${{ matrix.app }}
         run: npm test
-
       - name: Run e2e tests
         if: matrix.app != 'anecdotes'
         working-directory: ${{ matrix.app }}-tests
